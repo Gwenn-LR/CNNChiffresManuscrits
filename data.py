@@ -17,15 +17,17 @@ def chargementImagesTrainTest(pathDir:str) -> Tuple[list]:
     desktopIni = "desktop.ini"
 
     # Ignorer fichier créés par Drive
-    dirsData.pop(dirsData.index("desktop.ini"))
+    try :
+        dirsData.pop(dirsData.index("desktop.ini"))
+    except ValueError :
+        pass
 
     #Initialisation des datasets
-    #TODO: transformer en np.array
-    data = []   # La liste contenant [X_train, X_test, y_train, y_test]
-    X_train = []
-    y_train = []
-    X_test = []
-    y_test = []
+    #TODO: Checker la première valeur de ces listes
+    X_train = np.empty([0, 28, 28, 3])
+    y_train = np.empty([0])
+    X_test = np.empty([0, 28, 28, 3])
+    y_test = np.empty([0])
 
     # Parcours des sous-répertoires
     for dirData in dirsData:
@@ -60,8 +62,10 @@ def chargementImagesTrainTest(pathDir:str) -> Tuple[list]:
                     filesImages.pop(filesImages.index("desktop.ini"))
 
                 # Affectation des datasets
-                X_train.append([cv2.imread(f"{pathDir}/{dirData}/{dirDigit}/{fileImage}") for fileImage in filesImages])
-                y_train.append([dirDigit for fileImage in filesImages])
+                X_train = np.append(X_train, [cv2.imread(f"{pathDir}/{dirData}/{dirDigit}/{fileImage}") for fileImage in filesImages], axis=0)
+                # X_train.append([cv2.imread(f"{pathDir}/{dirData}/{dirDigit}/{fileImage}") for fileImage in filesImages])
+                y_train = np.append(y_train, [dirDigit for fileImage in filesImages], axis=0)
+                # y_train.append([dirDigit for fileImage in filesImages])
             
         elif "test" in dirData: # Test
 
@@ -80,17 +84,23 @@ def chargementImagesTrainTest(pathDir:str) -> Tuple[list]:
                     filesImages.pop(filesImages.index("desktop.ini"))
 
                 # Affectation des datasets
-                X_test.append([cv2.imread(f"{pathDir}/{dirData}/{dirDigit}/{fileImage}") for fileImage in filesImages])
-                y_test.append([dirDigit for fileImage in filesImages])
+                X_test = np.append(X_test, [cv2.imread(f"{pathDir}/{dirData}/{dirDigit}/{fileImage}") for fileImage in filesImages], axis=0)
+                y_test = np.append(y_test, [dirDigit for fileImage in filesImages], axis=0)
+                # X_test.append([cv2.imread(f"{pathDir}/{dirData}/{dirDigit}/{fileImage}") for fileImage in filesImages])
+                # y_test.append([dirDigit for fileImage in filesImages])
 
         else:
             pass
+
+    # Normalisation
+    X_train, X_test = X_train/255.0, X_test/255.0
+
 
     return X_train, X_test, y_train, y_test
 
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = chargementImagesTrainTest("data")
 
-    plt.imshow(X_train[9][0])
+    plt.imshow(X_train[500])
     plt.show()
-    print(y_train[9][0])
+    print(y_train[500])
